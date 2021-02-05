@@ -1,7 +1,22 @@
 #!/bin/bash
 
+# get arguments
+while [[ $# -gt 1 ]]
+do
+key="$1"
+case $key in
+    --path_to_sigma_rules)
+    PATH_TO_SIGMA_RULES="$2"
+    shift
+    ;;
+    *)
+    ;;
+esac
+shift # past argument or value
+done
+
 # get all sigma rules
-find path/to/sigma/rules -name "*.yml" > /tmp/rules.txt
+find $PATH_TO_SIGMA_RULES -name "*.yml" > /tmp/rules.txt
 
 # iterate over rules
 while read line; do

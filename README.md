@@ -8,17 +8,17 @@ If multiple ElastAlert rules are generated from a single Sigma rule, it splits t
 Files are named `.yaml` vs `.yml` for compatibility with Praeco.
 
 ## Use
-* Modify paths to rules in `sigma-to-elastalert.sh` and `playbook.yml`
+* Modify path vars in `playbook.yml`
 * Point to your own sigma config/backend files in `playbook.yml`
 * If you want to use different Sigma configs for different rule categories (ex: windows) or sub categories (ex: sysmon), add a when statement in `playbook.yml` and point to the appropriate config
   ```
   - name: Convert rules with sigmac 
-    shell: "path/to/sigma/tools/sigmac -t elastalert -c \"path/to/sigma/tools/config/winlogbeat.yml\" {{ rule_path }} -O http_post_include_rule_metadata -O alert_methods=http_post --backend-config \"path/to/sigma/tools/config/backends/config.yml\""
+    shell: "{{ path_to_sigma }}/tools/sigmac -t elastalert -c \"{{ path_to_sigma }}/tools/config/winlogbeat.yml\" {{ rule_path }} -O http_post_include_rule_metadata -O alert_methods=http_post --backend-config \"{{ path_to_sigma }}/tools/config/backends/config.yml\""
     register: rule
     when: rule_cat == 'windows' 
   ```
 * Run 
   ```
   chmod +x sigma-to-elastalert.sh
-  ./sigma-to-elastalert.sh
+  ./sigma-to-elastalert.sh --path_to_sigma_rules /path/to/sigma/rules
   ```
