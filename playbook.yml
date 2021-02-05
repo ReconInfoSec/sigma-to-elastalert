@@ -1,0 +1,32 @@
+---
+- name: Generate ElastAlert rules with sigmac
+  hosts: localhost
+  tasks:
+
+    - name: Make parent rule directories
+      file:
+        state: directory
+        path: "path/to/elastalert/rules/{{ rule_cat }}/{{ rule_dir }}"
+        recurse: yes
+      
+    - name: Convert rules with sigmac 
+      shell: "path/to/sigma/tools/sigmac -t elastalert -c \"path/to/sigma/tools/config/config.yml\" {{ rule_path }} -O http_post_include_rule_metadata -O alert_methods=http_post --backend-config \"path/to/sigma/tools/config/backends/config.yml\""
+      register: rule
+
+    - set_fact: 
+        rule_count: "{{ rule.stdout.split('\n\n') | length }}"
+        rules: "{{ rule.stdout.split('\n\n') }}"
+
+    - name: Iterate over rules and save to files, append index to names since multiple rules are included
+      local_action: copy content={{ rules[idx] }} dest=path/to/elastalert/rules/{{ rule_cat }}/{{ rule_dir }}/{{ rule_name.split(".yml")[0] }}_{{ idx }}.yaml
+      loop: "{{ rules }}"
+      loop_control:
+        index_var: idx
+      when: rule_count|int > 1
+
+    - name: Save rule to file
+      local_action: copy content={{ rules[idx] }} dest=path/to/elastalert/rules/{{ rule_cat }}/{{ rule_dir }}/{{ rule_name.split(".yml")[0] }}.yaml
+      loop: "{{ rules }}"
+      loop_control:
+        index_var: idx
+      when: rule_count|int == 1
